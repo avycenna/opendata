@@ -2,8 +2,8 @@
 
 import { useMemo } from 'react'
 import { Badge } from '@/components/ui/badge'
-import { School } from '@/lib/data'
-import { MapPin, Building2, Map, GraduationCap } from 'lucide-react'
+import type { School } from '@/app/rihla/rihla-client'
+import { MapPin, Building2, Map } from 'lucide-react'
 
 interface StatisticsPanelProps {
   schools: School[]
@@ -14,17 +14,13 @@ export default function StatisticsPanel({ schools }: StatisticsPanelProps) {
     const totalSchools = schools.length
     const uniqueRegions = new Set(schools.map(s => s.region)).size
     const uniqueCommunes = new Set(schools.map(s => s.commune)).size
-
-    const byType = {} as Record<string, number>
-    schools.forEach(school => {
-      byType[school.schoolType] = (byType[school.schoolType] || 0) + 1
-    })
+    const uniqueProvinces = new Set(schools.map(s => s.province)).size
 
     return {
       totalSchools,
       uniqueRegions,
+      uniqueProvinces,
       uniqueCommunes,
-      typeStats: Object.entries(byType).sort(([, a], [, b]) => b - a),
     }
   }, [schools])
 
@@ -58,23 +54,6 @@ export default function StatisticsPanel({ schools }: StatisticsPanelProps) {
           </div>
         </div>
       </div>
-
-      {/* School Types */}
-      {stats.typeStats.length > 0 && (
-        <div className="space-y-2">
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <GraduationCap className="h-3.5 w-3.5" />
-            <span>By Type</span>
-          </div>
-          <div className="flex flex-wrap gap-1.5">
-            {stats.typeStats.map(([type, count]) => (
-              <Badge key={type} variant="outline" className="gap-1 text-xs">
-                {type}: <span className="font-semibold">{count}</span>
-              </Badge>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   )
 }

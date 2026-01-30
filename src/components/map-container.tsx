@@ -2,8 +2,8 @@
 
 import { useMemo } from 'react'
 import { Map, MapClusterLayer, MapPopup, MapControls } from '@/components/ui/map'
-import { School } from '@/lib/data'
-import { MapPin, Building2, Tag } from 'lucide-react'
+import type { School } from '@/app/rihla/rihla-client'
+import { MapPin, Building2 } from 'lucide-react'
 
 interface MapContainerProps {
   schools: School[]
@@ -73,17 +73,6 @@ export default function MapContainer({ schools, selectedSchool, onSchoolSelect }
                   {selectedSchool.commune}, {selectedSchool.province}
                 </p>
                 <p className="text-xs text-muted-foreground">{selectedSchool.region}</p>
-              </div>
-            </div>
-
-            {/* School Type */}
-            <div className="flex gap-2.5">
-              <Tag className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-              <div className="flex-1 min-w-0">
-                <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">Type</p>
-                <span className="inline-block px-2 py-0.5 bg-primary/10 text-primary text-xs font-medium rounded mt-0.5">
-                  {selectedSchool.schoolType}
-                </span>
               </div>
             </div>
 

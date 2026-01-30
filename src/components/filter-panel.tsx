@@ -2,24 +2,59 @@
 
 import { useMemo } from 'react'
 import { MultiSelect } from '@/components/ui/combobox'
-import { FilterOptions, REGIONS, getProvincesByRegions, getCommunesByProvinces } from '@/lib/data'
+import type { FilterOptions, School } from '@/app/rihla/rihla-client'
 
 interface FilterPanelProps {
   filters: FilterOptions
   onFiltersChange: (filters: FilterOptions) => void
   onReset: () => void
+  schools: School[]
 }
 
-export default function FilterPanel({ filters, onFiltersChange, onReset }: FilterPanelProps) {
-  const availableProvinces = useMemo(
-    () => getProvincesByRegions(filters.regions),
-    [filters.regions]
-  )
+export default function FilterPanel({ filters, onFiltersChange, onReset, schools }: FilterPanelProps) {
+  // Derive all unique regions from schools
+  const allRegions = useMemo(() => {
+    const regions = new Set(schools.map(s => s.region))
+    return Array.from(regions).sort()
+  }, [schools])
 
-  const availableCommunes = useMemo(
-    () => getCommunesByProvinces(filters.provinces),
-    [filters.provinces]
-  )
+  // Get provinces filtered by selected regions
+  const availableProvinces = useMemo(() => {
+    const filteredSchools = filters.regions?.length 
+      ? schools.filter(s => filters.regions!.includes(s.region))
+      : schools
+    const provinces = new Set(filteredSchools.map(s => s.province))
+    return Array.from(provinces).sort()
+  }, [schools, filters.regions])
+
+  // Get communes filtered by selected provinces
+  const availableCommunes = useMemo(() => {
+    const filteredSchools = filters.provinces?.length
+      ? schools.filter(s => filters.provinces!.includes(s.province))
+      : filters.regions?.length
+        ? schools.filter(s => filters.regions!.includes(s.region))
+        : schools
+    const communes = new Set(filteredSchools.map(s => s.commune))
+    return Array.from(communes).sort()
+  }, [schools, filters.regions, filters.provinces])
+
+  // Helper to get provinces by regions from schools data
+  const getProvincesByRegions = (regionNames: string[] | undefined): string[] => {
+    if (!regionNames?.length) return Array.from(new Set(schools.map(s => s.province))).sort()
+    const provinces = new Set(
+      schools.filter(s => regionNames.includes(s.region)).map(s => s.province)
+    )
+    return Array.from(provinces).sort()
+  }
+
+  // Helper to get communes by provinces from schools data
+  const getCommunesByProvinces = (provinceNames: string[] | undefined): string[] => {
+    if (!provinceNames?.length) return Array.from(new Set(schools.map(s => s.commune))).sort()
+    const communes = new Set(
+      schools.filter(s => provinceNames.includes(s.province)).map(s => s.commune)
+    )
+    return Array.from(communes).sort()
+  }
 
   const handleRegionsChange = (regions: string[]) => {
     // Clear provinces/communes that are no longer valid
@@ -65,7 +100,7 @@ export default function FilterPanel({ filters, onFiltersChange, onReset }: Filte
           Regions
         </label>
         <MultiSelect
-          options={REGIONS}
+          options={allRegions}
           selected={filters.regions || []}
           onChange={handleRegionsChange}
           placeholder="All Regions"

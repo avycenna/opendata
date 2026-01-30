@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import dynamic from 'next/dynamic'
-import { School } from '@/lib/data'
+import type { School } from '@/app/rihla/rihla-client'
 
 const MapContainer = dynamic(() => import('./map-container'), { ssr: false })
 

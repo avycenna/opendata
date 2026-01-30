@@ -43,3 +43,12 @@ next-env.d.ts
 
 # local
 .local/
+
+# prisma
+/generated/prisma
+/prisma/migrations
+
+# database
+*.db
+*.sqlite
+*.sqlite3

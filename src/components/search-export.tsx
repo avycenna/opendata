@@ -3,7 +3,7 @@
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Search, Download, X } from 'lucide-react'
-import { School } from '@/lib/data'
+import type { School } from '@/app/rihla/rihla-client'
 
 interface SearchExportProps {
   schools: School[]
@@ -18,14 +18,13 @@ export default function SearchExport({ schools, searchQuery, onSearchChange }: S
       return
     }
 
-    const headers = ['Name', 'Address', 'Region', 'Province', 'Commune', 'Type', 'Latitude', 'Longitude']
+    const headers = ['Name', 'Address', 'Region', 'Province', 'Commune', 'Latitude', 'Longitude']
     const rows = schools.map(school => [
       school.name,
       school.address,
       school.region,
       school.province,
       school.commune,
-      school.schoolType,
       school.latitude,
       school.longitude,
     ])
