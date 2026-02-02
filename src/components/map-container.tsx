@@ -3,15 +3,17 @@
 import { useMemo } from 'react'
 import { Map, MapClusterLayer, MapPopup, MapControls } from '@/components/ui/map'
 import type { School } from '@/app/rihla/rihla-client'
-import { MapPin, Building2 } from 'lucide-react'
+import { MapPin, Building2, Navigation } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 
 interface MapContainerProps {
   schools: School[]
   selectedSchool?: School | null
   onSchoolSelect?: (school: School | null) => void
+  onGetDirections?: (school: School) => void
 }
 
-export default function MapContainer({ schools, selectedSchool, onSchoolSelect }: MapContainerProps) {
+export default function MapContainer({ schools, selectedSchool, onSchoolSelect, onGetDirections }: MapContainerProps) {
   // Convert schools array to GeoJSON format for MapClusterLayer
   const schoolsGeoJSON = useMemo(() => ({
     type: 'FeatureCollection' as const,
@@ -46,8 +48,13 @@ export default function MapContainer({ schools, selectedSchool, onSchoolSelect }
         <MapPopup
           longitude={selectedSchool.longitude}
           latitude={selectedSchool.latitude}
-          onClose={() => onSchoolSelect?.(null)}
+          onClose={() => {
+            // Only clear selection if user explicitly closes the popup
+            // Don't clear on unmount (e.g., when switching tabs)
+            onSchoolSelect?.(null)
+          }}
           closeButton
+          closeOnClick={false}
           focusAfterOpen={false}
           className="w-80"
         >
@@ -90,6 +97,23 @@ export default function MapContainer({ schools, selectedSchool, onSchoolSelect }
                 </div>
               </div>
             </div>
+
+            {/* Get Directions Button */}
+            {onGetDirections && (
+              <div className="pt-2">
+                <Button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onGetDirections(selectedSchool)
+                  }}
+                  className="w-full"
+                  size="sm"
+                >
+                  <Navigation className="h-4 w-4 mr-2" />
+                  Get Directions
+                </Button>
+              </div>
+            )}
           </div>
         </MapPopup>
       )}

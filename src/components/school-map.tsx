@@ -10,9 +10,10 @@ interface SchoolMapProps {
   schools: School[]
   selectedSchool?: School | null
   onSchoolSelect?: (school: School | null) => void
+  onGetDirections?: (school: School) => void
 }
 
-export default function SchoolMap({ schools, selectedSchool, onSchoolSelect }: SchoolMapProps) {
+export default function SchoolMap({ schools, selectedSchool, onSchoolSelect, onGetDirections }: SchoolMapProps) {
   const [isClient, setIsClient] = useState(false)
 
   useEffect(() => {
@@ -32,6 +33,7 @@ export default function SchoolMap({ schools, selectedSchool, onSchoolSelect }: S
       schools={schools}
       selectedSchool={selectedSchool}
       onSchoolSelect={onSchoolSelect}
+      onGetDirections={onGetDirections}
     />
   )
 }
