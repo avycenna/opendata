@@ -4,8 +4,12 @@ import { prisma } from "./prisma"
 
 export interface SchoolWithLocation {
   id: number
-  name: string
-  address: string
+  name_latin: string
+  name_arabic: string
+  address_latin: string
+  address_arabic: string
+  type: string
+  level: string
   latitude: number
   longitude: number
   commune: string
@@ -37,67 +41,71 @@ export async function getSchools(): Promise<SchoolWithLocation[]> {
 
   return schools.map(school => ({
     id: school.id,
-    name: school.name,
-    address: school.address,
+    name_latin: school.name_latin,
+    name_arabic: school.name_arabic,
+    address_latin: school.address_latin,
+    address_arabic: school.address_arabic,
+    type: school.type,
+    level: school.level,
     latitude: school.latitude,
     longitude: school.longitude,
-    commune: school.commune.name,
-    province: school.commune.province.name,
-    region: school.commune.province.region.name
+    commune: school.commune.name_latin,
+    province: school.commune.province.name_latin,
+    region: school.commune.province.region.name_latin
   }))
 }
 
 // Fetch all filter options (regions, provinces, communes)
 export async function getFilterOptions(): Promise<FilterOptionsData> {
   const [regions, provinces, communes] = await Promise.all([
-    prisma.region.findMany({ orderBy: { name: 'asc' } }),
-    prisma.province.findMany({ orderBy: { name: 'asc' } }),
-    prisma.commune.findMany({ orderBy: { name: 'asc' } })
+    prisma.region.findMany({ orderBy: { name_latin: 'asc' } }),
+    prisma.province.findMany({ orderBy: { name_latin: 'asc' } }),
+    prisma.commune.findMany({ orderBy: { name_latin: 'asc' } })
   ])
 
   return {
-    regions: regions.map(r => r.name),
-    provinces: provinces.map(p => p.name),
-    communes: communes.map(c => c.name)
+    regions: regions.map(r => r.name_latin),
+    provinces: provinces.map(p => p.name_latin),
+    communes: communes.map(c => c.name_latin)
   }
 }
 
 // Get provinces by selected regions
 export async function getProvincesByRegions(regionNames: string[]): Promise<string[]> {
   if (regionNames.length === 0) {
-    const provinces = await prisma.province.findMany({ orderBy: { name: 'asc' } })
-    return provinces.map(p => p.name)
+    const provinces = await prisma.province.findMany({ orderBy: { name_latin: 'asc' } })
+    return provinces.map(p => p.name_latin)
   }
 
   const provinces = await prisma.province.findMany({
     where: {
       region: {
-        name: { in: regionNames }
+        name_latin: { in: regionNames }
       }
     },
-    orderBy: { name: 'asc' }
+    orderBy: { name_latin: 'asc' }
   })
 
-  return provinces.map(p => p.name)
+  return provinces.map(p => p.name_latin)
 }
 
 // Get communes by selected provinces
 export async function getCommunesByProvinces(provinceNames: string[]): Promise<string[]> {
   if (provinceNames.length === 0) {
-    const communes = await prisma.commune.findMany({ orderBy: { name: 'asc' } })
-    return communes.map(c => c.name)
+    const communes = await prisma.commune.findMany({ orderBy: { name_latin: 'asc' } })
+    return communes.map(c => c.name_latin)
   }
 
   const communes = await prisma.commune.findMany({
     where: {
       province: {
-        name: { in: provinceNames }
+        name_latin: { in: provinceNames }
       }
     },
-    orderBy: { name: 'asc' }
+    orderBy: { name_latin: 'asc' }
   })
 
-  return communes.map(c => c.name)
+  return communes.map(c => c.name_latin)
 }
 
 // Filter and search schools
@@ -110,15 +118,15 @@ export async function filterAndSearchSchools(
 
   // Build commune filter based on hierarchy
   if (filters.communes?.length) {
-    whereClause.commune = { name: { in: filters.communes } }
+    whereClause.commune = { name_latin: { in: filters.communes } }
   } else if (filters.provinces?.length) {
     whereClause.commune = {
-      province: { name: { in: filters.provinces } }
+      province: { name_latin: { in: filters.provinces } }
     }
   } else if (filters.regions?.length) {
     whereClause.commune = {
       province: {
-        region: { name: { in: filters.regions } }
+        region: { name_latin: { in: filters.regions } }
       }
     }
   }
@@ -127,11 +135,13 @@ export async function filterAndSearchSchools(
   if (query.trim()) {
     const searchTerm = query.toLowerCase()
     whereClause.OR = [
-      { name: { contains: searchTerm } },
-      { address: { contains: searchTerm } },
-      { commune: { name: { contains: searchTerm } } },
-      { commune: { province: { name: { contains: searchTerm } } } },
-      { commune: { province: { region: { name: { contains: searchTerm } } } } }
+      { name_latin: { contains: searchTerm } },
+      { name_arabic: { contains: searchTerm } },
+      { address_latin: { contains: searchTerm } },
+      { address_arabic: { contains: searchTerm } },
+      { commune: { name_latin: { contains: searchTerm } } },
+      { commune: { province: { name_latin: { contains: searchTerm } } } },
+      { commune: { province: { region: { name_latin: { contains: searchTerm } } } } }
     ]
   }
 
@@ -152,12 +162,16 @@ export async function filterAndSearchSchools(
 
   return schools.map(school => ({
     id: school.id,
-    name: school.name,
-    address: school.address,
+    name_latin: school.name_latin,
+    name_arabic: school.name_arabic,
+    address_latin: school.address_latin,
+    address_arabic: school.address_arabic,
+    type: school.type,
+    level: school.level,
     latitude: school.latitude,
     longitude: school.longitude,
-    commune: school.commune.name,
-    province: school.commune.province.name,
-    region: school.commune.province.region.name
+    commune: school.commune.name_latin,
+    province: school.commune.province.name_latin,
+    region: school.commune.province.region.name_latin
   }))
 }

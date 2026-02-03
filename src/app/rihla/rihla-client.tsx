@@ -47,10 +47,14 @@ export interface FilterOptions {
 // Convert to School format expected by components
 export interface School {
   id: number
-  name: string
+  name_latin: string
+  name_arabic: string
+  address_latin: string
+  address_arabic: string
+  type: string
+  level: string
   latitude: number
   longitude: number
-  address: string
   region: string
   province: string
   commune: string
@@ -110,8 +114,10 @@ function filterAndSearchSchools(
   if (query.trim()) {
     const lowerQuery = query.toLowerCase()
     result = result.filter(s =>
-      s.name.toLowerCase().includes(lowerQuery) ||
-      s.address.toLowerCase().includes(lowerQuery) ||
+      s.name_latin.toLowerCase().includes(lowerQuery) ||
+      s.name_arabic.toLowerCase().includes(lowerQuery) ||
+      s.address_latin.toLowerCase().includes(lowerQuery) ||
+      s.address_arabic.toLowerCase().includes(lowerQuery) ||
       s.region.toLowerCase().includes(lowerQuery) ||
       s.province.toLowerCase().includes(lowerQuery) ||
       s.commune.toLowerCase().includes(lowerQuery)
@@ -251,7 +257,7 @@ export default function RihlaClient({ initialSchools }: RihlaClientProps) {
 
   // Sidebar content JSX
   const sidebarContent = (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-[80vh]">
       {/* Header */}
       <div className="p-4 border-b">
         <div className="flex items-center gap-2 mb-1">
@@ -542,7 +548,7 @@ export default function RihlaClient({ initialSchools }: RihlaClientProps) {
                   <MapMarker longitude={selectedSchool.longitude} latitude={selectedSchool.latitude}>
                     <MarkerContent>
                       <div className="size-5 rounded-full bg-red-500 border-2 border-white shadow-lg" />
-                      <MarkerLabel position="bottom">{selectedSchool.name}</MarkerLabel>
+                      <MarkerLabel position="bottom">{selectedSchool.name_latin}</MarkerLabel>
                     </MarkerContent>
                   </MapMarker>
                 </Map>
@@ -596,8 +602,8 @@ export default function RihlaClient({ initialSchools }: RihlaClientProps) {
                 <div className="absolute bottom-3 left-3 right-3 bg-card border rounded-lg p-4 shadow-lg max-w-md">
                   <div className="flex items-start justify-between gap-3 mb-3">
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-sm mb-1 truncate">{selectedSchool.name}</h3>
-                      <p className="text-xs text-muted-foreground truncate">{selectedSchool.address}</p>
+                      <h3 className="font-semibold text-sm mb-1 truncate">{selectedSchool.name_latin}</h3>
+                      <p className="text-xs text-muted-foreground truncate">{selectedSchool.address_latin}</p>
                       <p className="text-xs text-muted-foreground mt-1">
                         {selectedSchool.commune}, {selectedSchool.province}
                       </p>

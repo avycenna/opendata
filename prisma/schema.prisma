@@ -15,13 +15,15 @@ datasource db {
 
 model Region {
   id        Int      @id @default(autoincrement())
-  name      String
+  name_latin  String
+  name_arabic String
   provinces Province[]
 }
 
 model Province {
   id        Int      @id @default(autoincrement())
-  name      String
+  name_latin  String
+  name_arabic String
   communes  Commune[]
 
   regionId  Int
@@ -30,7 +32,8 @@ model Province {
 
 model Commune {
   id        Int      @id @default(autoincrement())
-  name      String
+  name_latin  String
+  name_arabic String
   schools   School[]
 
   provinceId Int
@@ -39,8 +42,12 @@ model Commune {
 
 model School {
   id        Int      @id @default(autoincrement())
-  name      String
-  address   String
+  name_latin  String
+  name_arabic String
+  address_latin String
+  address_arabic String
+  type      String
+  level     String
   latitude  Float
   longitude Float
   

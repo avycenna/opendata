@@ -60,14 +60,28 @@ export default function MapContainer({ schools, selectedSchool, onSchoolSelect, 
         >
           <div className="space-y-3 p-1">
             {/* School Name */}
-            <h3 className="font-semibold text-foreground pr-4">{selectedSchool.name}</h3>
+            <div>
+              <h3 className="font-semibold text-foreground pr-4">{selectedSchool.name_latin}</h3>
+              {selectedSchool.name_arabic && (
+                <p className="text-sm text-muted-foreground" dir="rtl">{selectedSchool.name_arabic}</p>
+              )}
+            </div>
+
+            {/* Type & Level */}
+            <div className="flex gap-2">
+              <span className="px-2 py-0.5 text-xs bg-primary/10 text-primary rounded-full capitalize">{selectedSchool.type}</span>
+              <span className="px-2 py-0.5 text-xs bg-muted text-muted-foreground rounded-full capitalize">{selectedSchool.level}</span>
+            </div>
             
             {/* Address */}
             <div className="flex gap-2.5">
               <MapPin className="h-4 w-4 text-primary shrink-0 mt-0.5" />
               <div className="flex-1 min-w-0">
                 <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">Address</p>
-                <p className="text-sm text-foreground">{selectedSchool.address}</p>
+                <p className="text-sm text-foreground">{selectedSchool.address_latin}</p>
+                {selectedSchool.address_arabic && (
+                  <p className="text-sm text-muted-foreground" dir="rtl">{selectedSchool.address_arabic}</p>
+                )}
               </div>
             </div>
 

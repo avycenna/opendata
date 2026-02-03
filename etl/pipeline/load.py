@@ -44,7 +44,9 @@ def _create_database_schema(conn: sqlite3.Connection):
   cursor.execute("""
     CREATE TABLE IF NOT EXISTS Region (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL UNIQUE
+      name_latin TEXT NOT NULL,
+      name_arabic TEXT NOT NULL,
+      UNIQUE(name_latin, name_arabic)
     )
   """)
   
@@ -52,10 +54,11 @@ def _create_database_schema(conn: sqlite3.Connection):
   cursor.execute("""
     CREATE TABLE IF NOT EXISTS Province (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
+      name_latin TEXT NOT NULL,
+      name_arabic TEXT NOT NULL,
       regionId INTEGER NOT NULL,
       FOREIGN KEY (regionId) REFERENCES Region(id),
-      UNIQUE(name, regionId)
+      UNIQUE(name_latin, name_arabic, regionId)
     )
   """)
   
@@ -63,10 +66,11 @@ def _create_database_schema(conn: sqlite3.Connection):
   cursor.execute("""
     CREATE TABLE IF NOT EXISTS Commune (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
+      name_latin TEXT NOT NULL,
+      name_arabic TEXT NOT NULL,
       provinceId INTEGER NOT NULL,
       FOREIGN KEY (provinceId) REFERENCES Province(id),
-      UNIQUE(name, provinceId)
+      UNIQUE(name_latin, name_arabic, provinceId)
     )
   """)
   
@@ -74,8 +78,12 @@ def _create_database_schema(conn: sqlite3.Connection):
   cursor.execute("""
     CREATE TABLE IF NOT EXISTS School (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      address TEXT NOT NULL,
+      name_latin TEXT NOT NULL,
+      name_arabic TEXT NOT NULL,
+      address_latin TEXT NOT NULL,
+      address_arabic TEXT NOT NULL,
+      type TEXT NOT NULL,
+      level TEXT NOT NULL,
       latitude REAL NOT NULL,
       longitude REAL NOT NULL,
       communeId INTEGER NOT NULL,
@@ -88,6 +96,8 @@ def _create_database_schema(conn: sqlite3.Connection):
   cursor.execute("CREATE INDEX IF NOT EXISTS idx_commune_province ON Commune(provinceId)")
   cursor.execute("CREATE INDEX IF NOT EXISTS idx_school_commune ON School(communeId)")
   cursor.execute("CREATE INDEX IF NOT EXISTS idx_school_coords ON School(latitude, longitude)")
+  cursor.execute("CREATE INDEX IF NOT EXISTS idx_school_type ON School(type)")
+  cursor.execute("CREATE INDEX IF NOT EXISTS idx_school_level ON School(level)")
   
   conn.commit()
   print("Database schema created successfully")
@@ -98,9 +108,9 @@ def _normalize_and_load(conn: sqlite3.Connection, records: list[dict]) -> dict:
   cursor = conn.cursor()
   
   # Lookup dictionaries for deduplication
-  regions: dict[str, int] = {}
-  provinces: dict[tuple[str, int], int] = {}  # (name, regionId) -> id
-  communes: dict[tuple[str, int], int] = {}   # (name, provinceId) -> id
+  regions: dict[str, int] = {}       # name_latin -> id
+  provinces: dict[tuple[str, int], int] = {}  # (name_latin, regionId) -> id
+  communes: dict[tuple[str, int], int] = {}   # (name_latin, provinceId) -> id
   
   stats = {"regions": 0, "provinces": 0, "communes": 0, "schools": 0}
   
@@ -113,9 +123,12 @@ def _normalize_and_load(conn: sqlite3.Connection, records: list[dict]) -> dict:
     if not region_name or not province_name or not commune_name:
       continue
     
-    # Insert or get Region
+    # Insert or get Region (using Latin name as key, Arabic defaults to empty)
     if region_name not in regions:
-      cursor.execute("INSERT INTO Region (name) VALUES (?)", (region_name,))
+      cursor.execute(
+        "INSERT INTO Region (name_latin, name_arabic) VALUES (?, ?)",
+        (region_name, "")
+      )
       regions[region_name] = cursor.lastrowid
       stats["regions"] += 1
     region_id = regions[region_name]
@@ -124,8 +137,8 @@ def _normalize_and_load(conn: sqlite3.Connection, records: list[dict]) -> dict:
     province_key = (province_name, region_id)
     if province_key not in provinces:
       cursor.execute(
-        "INSERT INTO Province (name, regionId) VALUES (?, ?)",
-        (province_name, region_id)
+        "INSERT INTO Province (name_latin, name_arabic, regionId) VALUES (?, ?, ?)",
+        (province_name, "", region_id)
       )
       provinces[province_key] = cursor.lastrowid
       stats["provinces"] += 1
@@ -135,30 +148,29 @@ def _normalize_and_load(conn: sqlite3.Connection, records: list[dict]) -> dict:
     commune_key = (commune_name, province_id)
     if commune_key not in communes:
       cursor.execute(
-        "INSERT INTO Commune (name, provinceId) VALUES (?, ?)",
-        (commune_name, province_id)
+        "INSERT INTO Commune (name_latin, name_arabic, provinceId) VALUES (?, ?, ?)",
+        (commune_name, "", province_id)
       )
       communes[commune_key] = cursor.lastrowid
       stats["communes"] += 1
     commune_id = communes[commune_key]
     
-    # Build school name (combine Latin and Arabic names)
+    # Get school data
     name_latin = record.get("name_latin", "").strip()
     name_arabic = record.get("name_arabic", "").strip()
-    school_name = f"{name_latin} ({name_arabic})" if name_arabic else name_latin
-    
-    # Build address (combine Latin and Arabic addresses)
-    addr_latin = record.get("address_latin", "").strip()
-    addr_arabic = record.get("address_arabic", "").strip()
-    address = f"{addr_latin} ({addr_arabic})" if addr_arabic else addr_latin
-    
+    address_latin = record.get("address_latin", "").strip()
+    address_arabic = record.get("address_arabic", "").strip()
+    school_type = record.get("type", "").strip()
+    school_level = record.get("level", "").strip()
     latitude = record.get("latitude", 0.0)
     longitude = record.get("longitude", 0.0)
     
     # Insert School
     cursor.execute(
-      "INSERT INTO School (name, address, latitude, longitude, communeId) VALUES (?, ?, ?, ?, ?)",
-      (school_name, address, latitude, longitude, commune_id)
+      """INSERT INTO School 
+         (name_latin, name_arabic, address_latin, address_arabic, type, level, latitude, longitude, communeId) 
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+      (name_latin, name_arabic, address_latin, address_arabic, school_type, school_level, latitude, longitude, commune_id)
     )
     stats["schools"] += 1
   

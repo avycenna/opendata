@@ -18,10 +18,14 @@ export default function SearchExport({ schools, searchQuery, onSearchChange }: S
       return
     }
 
-    const headers = ['Name', 'Address', 'Region', 'Province', 'Commune', 'Latitude', 'Longitude']
+    const headers = ['Name (Latin)', 'Name (Arabic)', 'Address (Latin)', 'Address (Arabic)', 'Type', 'Level', 'Region', 'Province', 'Commune', 'Latitude', 'Longitude']
     const rows = schools.map(school => [
-      school.name,
-      school.address,
+      school.name_latin,
+      school.name_arabic,
+      school.address_latin,
+      school.address_arabic,
+      school.type,
+      school.level,
       school.region,
       school.province,
       school.commune,
