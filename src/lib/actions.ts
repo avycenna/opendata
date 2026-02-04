@@ -175,3 +175,10 @@ export async function filterAndSearchSchools(
     region: school.commune.province.region.name_latin
   }))
 }
+
+export async function getStarCount() {
+  const response = await fetch('https://api.github.com/repos/avycenna/opendata');
+  const data = await response.json();
+  const stars = data.stargazers_count || 0;
+  return stars;
+}

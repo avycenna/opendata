@@ -5,13 +5,13 @@ export default function Footer() {
         <div>
           <h4 className="font-semibold text-sm text-foreground mb-2">About This Platform</h4>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            A government-backed transparency platform and reference use case for ADD open data, demonstrating the reusability of Morocco&apos;s public datasets aligned with Digital Morocco 2030.
+            Transparency platform and reference use case for ADD open data, demonstrating the reusability of Morocco&apos;s public datasets.
           </p>
         </div>
         <div>
           <h4 className="font-semibold text-sm text-foreground mb-2">What is Open Data?</h4>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            Open data is freely available public information that can be reused, redistributed, and analyzed by anyone. This platform demonstrates the value of transparent, accessible educational infrastructure data.
+            Open data is freely available public information that can be reused, redistributed, and analyzed by anyone.
           </p>
         </div>
         <div>
@@ -32,14 +32,15 @@ export default function Footer() {
 
       <div className="text-center pt-4 border-t border-border">
         <p className="text-xs text-muted-foreground">
-          © {new Date().getFullYear()} Avycenna • Powered by ADD Open Data Platform •{' '}
+          © {new Date().getFullYear()} Avycenna • Powered by ADD Open Data Platform
+          {/* {' '}•{' '}
           <a href="#" className="text-primary hover:underline">
             Privacy Policy
           </a>{' '}
           •{' '}
           <a href="#" className="text-primary hover:underline">
             Terms of Use
-          </a>
+          </a> */}
         </p>
       </div>
     </footer>
