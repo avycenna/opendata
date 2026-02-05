@@ -1,0 +1,14 @@
+# Node modules and build artifacts
+node_modules
+.next
+
+# Git
+.git
+.gitignore
+
+# Logs
+*.log
+
+# SQLite and env files (handled externally)
+*.db
+.env*
