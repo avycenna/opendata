@@ -1,9 +1,9 @@
 # Stage 1: Build
-FROM node:20-bullseye-slim AS builder
+FROM node:24-bullseye-slim AS builder
 WORKDIR /app
 
 # Enable pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable && corepack prepare pnpm@10.27.0 --activate
 
 # Install dependencies
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml* ./
@@ -13,7 +13,7 @@ RUN pnpm install --frozen-lockfile
 COPY . .
 
 # Generate Prisma client before build
-RUN pnpx prisma generate
+RUN pnpm prisma generate
 
 # Build app
 RUN pnpm build
@@ -22,11 +22,11 @@ RUN pnpm build
 RUN pnpm prune --prod
 
 # Stage 2: Production image
-FROM node:20-bullseye-slim
+FROM node:24-bullseye-slim
 WORKDIR /app
 
 # Enable pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
+RUN corepack enable && corepack prepare pnpm@10.27.0 --activate
 
 # Set production environment
 ENV NODE_ENV=production
