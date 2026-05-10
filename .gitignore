@@ -47,9 +47,3 @@ next-env.d.ts
 # prisma
 /prisma/generated
 /prisma/migrations
-
-# database
-*.db
-*.sqlite
-*.sqlite3
-/data
